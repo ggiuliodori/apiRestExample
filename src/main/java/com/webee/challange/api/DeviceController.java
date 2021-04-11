@@ -30,12 +30,12 @@ public class DeviceController {
     }
 
     @RequestMapping(value = "/device/id/{id}", method = RequestMethod.GET)
-    public Optional<Device> getDeviceById(@PathVariable Long id) {
+    public Optional<Device> getDeviceById(@PathVariable String id) {
         return deviceServices.getDeviceById(id);
     }
 
     @RequestMapping(value = "/device/{id}", method = RequestMethod.DELETE)
-    public void deleteDeviceById(@PathVariable Long id) {
+    public void deleteDeviceById(@PathVariable String id) {
         deviceServices.deleteDeviceById(id);
     }
 
