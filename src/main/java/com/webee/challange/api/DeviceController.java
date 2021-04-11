@@ -1,6 +1,6 @@
 package com.webee.challange.api;
 
-import com.webee.challange.repository.Device;
+import com.webee.challange.repository.models.Device;
 import com.webee.challange.services.DeviceServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

@@ -1,4 +1,4 @@
-package com.webee.challange.repository;
+package com.webee.challange.repository.models;
 
 import lombok.Data;
 
@@ -22,7 +22,7 @@ public class Device {
     public Device() {
     }
 
-    public Device(Long id, String macaddress, Timestamp timestamp) {
+    public Device(Long id, String macAddress, Timestamp timestamp) {
         this.id = id;
         this.macAddress = macAddress;
         this.timestamp = timestamp;
