@@ -3,7 +3,8 @@ package com.webee.challange.repository.models;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
+import java.util.Date;
+
 
 @Data
 @Entity
@@ -16,13 +17,13 @@ public class Device {
     @Column(unique = true)
     private String macAddress;
 
-    private Timestamp timestamp;
+    private Date timestamp;
 
 
     public Device() {
     }
 
-    public Device(Long id, String macAddress, Timestamp timestamp) {
+    public Device(Long id, String macAddress, Date timestamp) {
         this.id = id;
         this.macAddress = macAddress;
         this.timestamp = timestamp;

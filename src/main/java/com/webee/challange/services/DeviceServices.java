@@ -8,6 +8,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,10 +25,12 @@ public class DeviceServices {
     public void addDevice(Device device) {
         if (validateMacAddress(device.getMacAddress())) {
             try {
+                device.setTimestamp(new Date());
                 deviceRepository.save(device);
                 log.info("The Device with mac address {} was added successfully", device.getMacAddress());
             } catch (DataIntegrityViolationException e) {
-                log.error("Mac address {} already exists. Device was not added");
+                log.error("Mac address {} already exists. Device was not added", device.getMacAddress());
+                throw e;
             }
         } else {
             log.error("Invalid Mac address = {} - The device was not added", device.getMacAddress());
@@ -47,23 +51,13 @@ public class DeviceServices {
         return deviceRepository.findByMacAddress(macAddress);
     }
 
-    public Optional<Device> getDeviceById(String id) {
-        if (validateId(id)) {
-            log.info("Getting device with id {}", id);
-            return deviceRepository.findById(Long.valueOf(id));
-        } else {
-            log.warn("Invalid id {}", id);
-            return null;
-        }
+    public Optional<Device> getDeviceById(Long id) {
+        return deviceRepository.findById(id);
     }
 
     public void deleteDeviceById(String id) {
-        if (validateId(id)) {
-            log.info("Removing device with id {}", id);
-            deviceRepository.deleteById(Long.valueOf(id));
-        } else {
-            log.warn("Invalid id {}", id);
-        }
+        log.info("Removing device with id {}", id);
+        deviceRepository.deleteById(Long.valueOf(id));
     }
 
     private boolean validateMacAddress(String macAddress) {
@@ -84,22 +78,9 @@ public class DeviceServices {
         return m.matches();
     }
 
-    private boolean validateId(String id) {
-
-        String regex = "^[0-9]\\d*$";
-
-        Pattern p = Pattern.compile(regex);
-
-        try {
-            if (id == null) {
-                return false;
-            }
-
-            Matcher m = p.matcher(id);
-            return m.matches();
-        } catch (Exception e) {
-            log.error("Validate Id error: {}", e.getMessage());
-            return false;
-        }
+    private boolean validateTimestamp(Date timestamp) {
+        Calendar limitDate = Calendar.getInstance();
+        limitDate.set(2020,01,01,0,0,0);
+        return (limitDate.getTime().after(timestamp));
     }
 }
