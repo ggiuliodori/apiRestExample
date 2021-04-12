@@ -2,11 +2,18 @@ package com.webee.challange.api;
 
 import com.webee.challange.repository.models.Device;
 import com.webee.challange.services.DeviceServices;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
+import java.util.Date;
 import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequestMapping("/api")
 public class DeviceController {
@@ -15,28 +22,84 @@ public class DeviceController {
     private DeviceServices deviceServices;
 
     @RequestMapping(value = "/device", method = RequestMethod.POST)
-    public void addDevice(@RequestBody Device jsonDevice) {
-        deviceServices.addDevice(jsonDevice);
+    public ResponseEntity<?> addDevice(@RequestBody Device jsonDevice) {
+        try {
+            deviceServices.addDevice(jsonDevice);
+            log.info("status code: {}", HttpStatus.CREATED);
+            return new ResponseEntity<>(jsonDevice, HttpStatus.CREATED);
+        } catch (DataIntegrityViolationException e) {
+            ErrorResponse jsonResponse = new ErrorResponse();
+            jsonResponse.setTimestamp(new Date());
+            jsonResponse.setStatus(HttpStatus.CONFLICT);
+            jsonResponse.setMessage(e.getMessage());
+            jsonResponse.setCode(409);
+            jsonResponse.setError(e.getClass().getName());
+            jsonResponse.setPath("/api/device");
+            log.error("error: {}", jsonResponse);
+            return new ResponseEntity<>(jsonResponse, HttpStatus.CONFLICT);
+        }
     }
 
     @RequestMapping(value = "/device", method = RequestMethod.GET)
-    public Iterable<Device> getAllDevice() {
-        return deviceServices.getAllDevice();
+    public ResponseEntity<Iterable<Device>> getAllDevice() {
+        Iterable<Device> deviceList = deviceServices.getAllDevice();
+        log.info("status code: {}", HttpStatus.OK);
+        return new ResponseEntity<Iterable<Device>>(deviceList, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/device/macAddress/{macAddress}", method = RequestMethod.GET)
-    public Optional<Device> getDeviceByMacAddress(@PathVariable String macAddress) {
-        return deviceServices.getDeviceByMacAddress(macAddress);
+    public ResponseEntity<?> getDeviceByMacAddress(@PathVariable String macAddress) {
+        Optional<Device> device = deviceServices.getDeviceByMacAddress(macAddress);
+        if (device.isPresent())
+            return new ResponseEntity<> (device, HttpStatus.OK);
+        else {
+            ErrorResponse jsonResponse = new ErrorResponse();
+            jsonResponse.setTimestamp(new Date());
+            jsonResponse.setStatus(HttpStatus.NOT_FOUND);
+            jsonResponse.setMessage("device with id {"+macAddress+"} doesn't exist");
+            jsonResponse.setCode(404);
+            jsonResponse.setError("resource not available");
+            jsonResponse.setPath("/api/device/macAddress");
+            log.error("error: {}", jsonResponse);
+            return new ResponseEntity<> (jsonResponse, HttpStatus.NOT_FOUND);
+        }
     }
 
     @RequestMapping(value = "/device/id/{id}", method = RequestMethod.GET)
-    public Optional<Device> getDeviceById(@PathVariable String id) {
-        return deviceServices.getDeviceById(id);
+    public ResponseEntity<?> getDeviceById(@PathVariable Long id) {
+            Optional<Device> device = deviceServices.getDeviceById(id);
+            if (device.isPresent())
+                return new ResponseEntity<> (device, HttpStatus.OK);
+            else {
+                ErrorResponse jsonResponse = new ErrorResponse();
+                jsonResponse.setTimestamp(new Date());
+                jsonResponse.setStatus(HttpStatus.NOT_FOUND);
+                jsonResponse.setMessage("device with id {"+id+"} doesn't exist");
+                jsonResponse.setCode(404);
+                jsonResponse.setError("resource not available");
+                jsonResponse.setPath("/api/device/id");
+                log.error("error: {}", jsonResponse);
+                return new ResponseEntity<> (jsonResponse, HttpStatus.NOT_FOUND);
+            }
     }
 
     @RequestMapping(value = "/device/{id}", method = RequestMethod.DELETE)
-    public void deleteDeviceById(@PathVariable String id) {
-        deviceServices.deleteDeviceById(id);
+    public ResponseEntity<?> deleteDeviceById(@PathVariable String id) {
+        try {
+            deviceServices.deleteDeviceById(id);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            ErrorResponse jsonResponse = new ErrorResponse();
+            jsonResponse.setTimestamp(new Date());
+            jsonResponse.setStatus(HttpStatus.NOT_FOUND);
+            jsonResponse.setMessage("device with id {"+id+"} doesn't exist");
+            jsonResponse.setCode(409);
+            jsonResponse.setError("resource not available");
+            jsonResponse.setPath("/api/device");
+            log.error("error: {}", jsonResponse);
+            return new ResponseEntity<>(jsonResponse, HttpStatus.CONFLICT);
+        }
+
     }
 
 }
