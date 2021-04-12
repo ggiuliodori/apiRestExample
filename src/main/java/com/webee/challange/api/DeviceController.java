@@ -2,13 +2,13 @@ package com.webee.challange.api;
 
 import com.webee.challange.repository.models.Device;
 import com.webee.challange.services.DeviceServices;
+import com.webee.challange.services.ErrorService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 import java.util.Date;
 import java.util.Optional;
@@ -37,6 +37,16 @@ public class DeviceController {
             jsonResponse.setPath("/api/device");
             log.error("error: {}", jsonResponse);
             return new ResponseEntity<>(jsonResponse, HttpStatus.CONFLICT);
+        } catch (ErrorService e) {
+            ErrorResponse jsonResponse = new ErrorResponse();
+            jsonResponse.setTimestamp(new Date());
+            jsonResponse.setStatus(HttpStatus.BAD_REQUEST);
+            jsonResponse.setMessage(e.getMessage());
+            jsonResponse.setCode(400);
+            jsonResponse.setError(e.getClass().getName());
+            jsonResponse.setPath("/api/device");
+            log.error("error: {}", jsonResponse);
+            return new ResponseEntity<>(jsonResponse, HttpStatus.BAD_REQUEST);
         }
     }
 

@@ -22,18 +22,27 @@ public class DeviceServices {
     private DeviceRepository deviceRepository;
 
     @ExceptionHandler
-    public void addDevice(Device device) {
+    public void addDevice(Device device) throws ErrorService {
         if (validateMacAddress(device.getMacAddress())) {
             try {
-                device.setTimestamp(new Date());
-                deviceRepository.save(device);
-                log.info("The Device with mac address {} was added successfully", device.getMacAddress());
+                if (device.getTimestamp() == null) {
+                    device.setTimestamp(new Date());
+                } else {
+                    if (validateTimestamp(device.getTimestamp())) {
+                        deviceRepository.save(device);
+                        log.info("The Device with mac address {} was added successfully", device.getMacAddress());
+                    } else {
+                        throw new ErrorService("invalid timestamp");
+                    }
+                }
+
             } catch (DataIntegrityViolationException e) {
                 log.error("Mac address {} already exists. Device was not added", device.getMacAddress());
                 throw e;
             }
         } else {
             log.error("Invalid Mac address = {} - The device was not added", device.getMacAddress());
+            throw new ErrorService("Invalid mac address");
         }
     }
 
@@ -62,11 +71,11 @@ public class DeviceServices {
 
     private boolean validateMacAddress(String macAddress) {
 
-        String regex = "^([0-9A-Za-z]{2}[::])"
-                + "{5}([0-9A-Za-z]{2})|"
-                + "([0-9a-zA-Z]{4}\\."
-                + "[0-9a-zA-Z]{4}\\."
-                + "[0-9a-zA-Z]{4})$";
+        String regex = "^([A-Z]{2}[::])"
+                + "{5}([A-Z]{2})|"
+                + "([A-Z]{4}\\."
+                + "[A-Z]{4}\\."
+                + "[A-Z]{4})$";
 
         Pattern p = Pattern.compile(regex);
 
@@ -81,6 +90,6 @@ public class DeviceServices {
     private boolean validateTimestamp(Date timestamp) {
         Calendar limitDate = Calendar.getInstance();
         limitDate.set(2020,01,01,0,0,0);
-        return (limitDate.getTime().after(timestamp));
+        return (!limitDate.getTime().after(timestamp));
     }
 }
