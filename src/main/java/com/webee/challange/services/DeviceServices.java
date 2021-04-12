@@ -27,15 +27,13 @@ public class DeviceServices {
             try {
                 if (device.getTimestamp() == null) {
                     device.setTimestamp(new Date());
-                } else {
-                    if (validateTimestamp(device.getTimestamp())) {
+                }
+                if (validateTimestamp(device.getTimestamp())) {
                         deviceRepository.save(device);
                         log.info("The Device with mac address {} was added successfully", device.getMacAddress());
-                    } else {
-                        throw new ErrorService("invalid timestamp");
-                    }
+                } else {
+                    throw new ErrorService("invalid timestamp");
                 }
-
             } catch (DataIntegrityViolationException e) {
                 log.error("Mac address {} already exists. Device was not added", device.getMacAddress());
                 throw e;
