@@ -62,9 +62,9 @@ public class DeviceServices {
         return deviceRepository.findById(id);
     }
 
-    public void deleteDeviceById(String id) {
+    public void deleteDeviceById(Long id) throws Exception {
         log.info("Removing device with id {}", id);
-        deviceRepository.deleteById(Long.valueOf(id));
+        deviceRepository.deleteById(id);
     }
 
     private boolean validateMacAddress(String macAddress) {

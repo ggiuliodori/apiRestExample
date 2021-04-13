@@ -94,7 +94,7 @@ public class DeviceController {
     }
 
     @RequestMapping(value = "/device/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteDeviceById(@PathVariable String id) {
+    public ResponseEntity<?> deleteDeviceById(@PathVariable Long id) {
         try {
             deviceServices.deleteDeviceById(id);
             return new ResponseEntity<>(HttpStatus.OK);
@@ -103,11 +103,11 @@ public class DeviceController {
             jsonResponse.setTimestamp(new Date());
             jsonResponse.setStatus(HttpStatus.NOT_FOUND);
             jsonResponse.setMessage("device with id {"+id+"} doesn't exist");
-            jsonResponse.setCode(409);
+            jsonResponse.setCode(404);
             jsonResponse.setError("resource not available");
             jsonResponse.setPath("/api/device");
             log.error("error: {}", jsonResponse);
-            return new ResponseEntity<>(jsonResponse, HttpStatus.CONFLICT);
+            return new ResponseEntity<>(jsonResponse, HttpStatus.NOT_FOUND);
         }
 
     }
