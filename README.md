@@ -69,8 +69,10 @@ git clone https://github.com/ggiuliodori/apiRestExample.git
 ```
 cd apiRestExample
 ```
-##Run Java App
+##Run Java App with database running in Google Datastore
 set aplication.properties file with database credentials
+> :warning: **spring.jpa.hibernate.ddl-auto=create** when this property is active, the database is regenerated
+every time the app is initialized. to disable this option, comment out the line in application.properties
 
 Build
 ```
@@ -85,6 +87,26 @@ make test-run
 Run develop
 ```
 make develop-run
+```
+
+##Run Java App locally
+
+###Requirment
+Docker and docker-compose installed
+
+Build
+```
+make build
+```
+
+Run test
+```
+make test-run
+```
+
+Run local-develop
+```
+make local-develop-run
 ```
 
 ###END POINTS
